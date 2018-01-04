@@ -55,9 +55,31 @@ class ToDoItem(QWidget):
         self.hLayout.addWidget(self.urgencyCheckBox, 4)
         self.setLayout(self.hLayout)
         parent.itemClicked.connect(self.itemClickedSlot)
+        self.doneBtn.clicked.connect(self.doneBtnClickedSlot)
+        self.delBtn.clicked.connect(self.delBtnClickedSlot)
+        self.importanceCheckBox.clicked.connect(self.importanceCheckedSlot)
+        self.urgencyCheckBox.clicked.connect(self.urgencyCheckedSlot)
 
     def itemClickedSlot(self):
         print(self.toDoTextLabel.text())
+
+    def doneBtnClickedSlot(self):
+        print("已完成")
+
+    def delBtnClickedSlot(self):
+        print("已删除")
+
+    def importanceCheckedSlot(self, checked):
+        if checked:
+            print("重要的")
+        else:
+            print("不重要的")
+
+    def urgencyCheckedSlot(self, checked):
+        if checked:
+            print("紧急的")
+        else:
+            print("不紧急的")
 
 
 class MyToDoUi(QObject):
