@@ -42,7 +42,7 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <layout class="QHBoxLayout" name="top">
+      <layout class="QHBoxLayout" name="todohead_hboxlayout">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
@@ -89,7 +89,7 @@ font:bold;</string>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="body">
+      <layout class="QVBoxLayout" name="todoitem_vboxlayout">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
@@ -113,6 +113,20 @@ font:bold;</string>
          <property name="styleSheet">
           <string notr="true">background-color:transparent;
 border:0;</string>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListWidget" name="DoneListWidget">
+         <property name="styleSheet">
+          <string notr="true">background-color:transparent;
+border:0;</string>
+         </property>
+         <property name="autoScroll">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

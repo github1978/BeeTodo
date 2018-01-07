@@ -28,12 +28,14 @@ class MyMainWindow(QMainWindow):
             event.accept()
 
 
-class ToDoItem(QWidget):
+class ToDoItem(QListWidgetItem):
     DONE_STATE = 1
     TODO_STATE = 0
 
     def __init__(self, parent: QListWidget=None, todotext='no set'):
-        QWidget.__init__(self, parent)
+        QListWidgetItem.__init__(self, parent)
+        self.parent = parent
+        self.widget = QWidget()
         self.hLayout = QHBoxLayout()
         self.toDoTextLabel = QLabel()
         self.toDoTextLabel.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_LABEL'))
@@ -53,38 +55,39 @@ class ToDoItem(QWidget):
         self.hLayout.addWidget(self.toDoTextLabel, 2)
         self.hLayout.addWidget(self.importanceCheckBox, 3)
         self.hLayout.addWidget(self.urgencyCheckBox, 4)
-        self.setLayout(self.hLayout)
-        parent.itemClicked.connect(self.itemClickedSlot)
+        self.widget.setLayout(self.hLayout)
         self.doneBtn.clicked.connect(self.doneBtnClickedSlot)
         self.delBtn.clicked.connect(self.delBtnClickedSlot)
         self.importanceCheckBox.clicked.connect(self.importanceCheckedSlot)
         self.urgencyCheckBox.clicked.connect(self.urgencyCheckedSlot)
+        self.parent.setItemWidget(self, self.widget)
 
-    def itemClickedSlot(self):
+    def itemClicked(self):
         print(self.toDoTextLabel.text())
 
     def doneBtnClickedSlot(self):
-        print("已完成")
+        print(self.toDoTextLabel.text()+"已完成")
 
     def delBtnClickedSlot(self):
-        print("已删除")
+        print(self.toDoTextLabel.text()+"已删除")
 
     def importanceCheckedSlot(self, checked):
         if checked:
-            print("重要的")
+            print(self.toDoTextLabel.text()+"重要的")
         else:
-            print("不重要的")
+            print(self.toDoTextLabel.text()+"不重要的")
 
     def urgencyCheckedSlot(self, checked):
         if checked:
-            print("紧急的")
+            print(self.toDoTextLabel.text()+"紧急的")
         else:
-            print("不紧急的")
+            print(self.toDoTextLabel.text()+"不紧急的")
 
 
 class MyToDoUi(QObject):
     def __init__(self, window):
         QObject.__init__(self)
+
         self.ui = MyToDo.Ui_MainWindow()
         self.mainWindow = window
         pal = QPalette()
@@ -92,16 +95,30 @@ class MyToDoUi(QObject):
         self.ui.setupUi(self.mainWindow)
         self.ui.centralwidget.setAutoFillBackground(True)
         self.ui.centralwidget.setPalette(pal)
+        self.ui.ToDoListWidget.maximumHeight = 290
+        self.ui.ToDoListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.ui.DoneListWidget.maximumHeight = 290
+        self.ui.DoneListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def init(self):
-        self.addToDoItem('ice')
+        self.addToDoItem('业财对接支付清算余额上线')
+        self.addToDoItem('业财平台版本模块变更')
+        self.addToDoItem('业财平台版本模块变更')
+        self.addToDoItem('业财平台版本模块变更')
+        self.addToDoItem('业财平台版本模块变更')
+        self.addToDoItem('业财平台版本模块变更')
+        self.addToDoItem('业财平台版本模块变更')
+        self.addToDoItem('业财平台版本模块变更')
+        self.addToDoItem('业财平台版本模块变更')
+        self.ui.ToDoListWidget.itemClicked.connect(self.itemClickedSlot)
 
     def addToDoItem(self, todotext):
         todoItem = ToDoItem(self.ui.ToDoListWidget, todotext)
-        qListWidgetItem = QListWidgetItem()
-        qListWidgetItem.setSizeHint(QSize(90, 40))
-        self.ui.ToDoListWidget.addItem(qListWidgetItem)
-        self.ui.ToDoListWidget.setItemWidget(qListWidgetItem, todoItem)
+        todoItem.setSizeHint(QSize(90,40))
+        self.ui.ToDoListWidget.addItem(todoItem)
+
+    def itemClickedSlot(self, item: ToDoItem):
+        item.itemClicked()
 
     def showMainWindow(self):
         self.mainWindow.show()
