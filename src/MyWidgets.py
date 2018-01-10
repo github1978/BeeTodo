@@ -32,7 +32,7 @@ class ToDoItem(QListWidgetItem):
     DONE_STATE = 1
     TODO_STATE = 0
 
-    def __init__(self, parent: QListWidget=None, todotext='no set'):
+    def __init__(self, parent: QListWidget=None, todotext='no set', state=TODO_STATE):
         QListWidgetItem.__init__(self, parent)
         self.parent = parent
         self.widget = QWidget()
@@ -41,35 +41,62 @@ class ToDoItem(QListWidgetItem):
         self.toDoTextLabel.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_LABEL'))
         self.toDoTextLabel.setText(todotext)
         self.toDoTextLabel.setGraphicsEffect(StyleSheets.getShadowEffect())
-        self.importanceCheckBox = QCheckBox()
-        self.urgencyCheckBox = QCheckBox()
-        self.doneBtn = QPushButton()
-        self.doneBtn.setText('√')
-        self.doneBtn.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_BTN'))
-        self.delBtn = QPushButton()
-        self.delBtn.setText('X')
-        self.delBtn.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_BTN'))
-        self.state = self.TODO_STATE
-        self.hLayout.addWidget(self.doneBtn, 0)
-        self.hLayout.addWidget(self.delBtn, 1)
-        self.hLayout.addWidget(self.toDoTextLabel, 2)
-        self.hLayout.addWidget(self.importanceCheckBox, 3)
-        self.hLayout.addWidget(self.urgencyCheckBox, 4)
+        self.state = state
+        if state == self.TODO_STATE:
+            self.doneBtn = QPushButton()
+            self.doneBtn.setText('√')
+            self.doneBtn.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_BTN'))
+            self.delBtn = QPushButton()
+            self.delBtn.setText('X')
+            self.delBtn.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_BTN'))
+            self.doneBtn.clicked.connect(self.doneBtnClickedSlot)
+            self.delBtn.clicked.connect(self.delBtnClickedSlot)
+            self.importanceCheckBox = QCheckBox()
+            self.urgencyCheckBox = QCheckBox()
+            self.hLayout.addWidget(self.doneBtn, 0)
+            self.hLayout.addWidget(self.delBtn, 1)
+            self.hLayout.addWidget(self.toDoTextLabel, 2)
+            self.hLayout.addWidget(self.importanceCheckBox, 3)
+            self.hLayout.addWidget(self.urgencyCheckBox, 4)
+            self.importanceCheckBox.clicked.connect(self.importanceCheckedSlot)
+            self.urgencyCheckBox.clicked.connect(self.urgencyCheckedSlot)
+        else:
+            self.resumeBtn = QPushButton()
+            self.resumeBtn.setText('R')
+            self.resumeBtn.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_BTN'))
+            self.resumeBtn.clicked.connect(self.resumeBtnClickedSlot)
+            self.hLayout.addWidget(self.resumeBtn, 0)
+            self.hLayout.addWidget(self.toDoTextLabel, 1)
         self.widget.setLayout(self.hLayout)
-        self.doneBtn.clicked.connect(self.doneBtnClickedSlot)
-        self.delBtn.clicked.connect(self.delBtnClickedSlot)
-        self.importanceCheckBox.clicked.connect(self.importanceCheckedSlot)
-        self.urgencyCheckBox.clicked.connect(self.urgencyCheckedSlot)
         self.parent.setItemWidget(self, self.widget)
+
+    def setMyToDoUi(self, mytodo):
+        self.mytodo = mytodo
 
     def itemClicked(self):
         print(self.toDoTextLabel.text())
 
+    def text(self):
+        return self.toDoTextLabel.text()
+
     def doneBtnClickedSlot(self):
+        doneListWidget = self.mytodo.ui.DoneListWidget
+        self.delete()
+        self.mytodo.addToDoItem(ToDoItem(doneListWidget, self.text(), self.DONE_STATE))
         print(self.toDoTextLabel.text()+"已完成")
 
     def delBtnClickedSlot(self):
+        self.delete()
         print(self.toDoTextLabel.text()+"已删除")
+
+    def resumeBtnClickedSlot(self):
+        toDoListWidget = self.mytodo.ui.ToDoListWidget
+        self.delete()
+        self.mytodo.addToDoItem(ToDoItem(toDoListWidget, self.text(), self.TODO_STATE))
+        print(self.text()+"已恢复")
+
+    def delete(self):
+        self.parent.takeItem(self.parent.row(self))
 
     def importanceCheckedSlot(self, checked):
         if checked:
@@ -101,21 +128,15 @@ class MyToDoUi(QObject):
         self.ui.DoneListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def init(self):
-        self.addToDoItem('业财对接支付清算余额上线')
-        self.addToDoItem('业财平台版本模块变更')
-        self.addToDoItem('业财平台版本模块变更')
-        self.addToDoItem('业财平台版本模块变更')
-        self.addToDoItem('业财平台版本模块变更')
-        self.addToDoItem('业财平台版本模块变更')
-        self.addToDoItem('业财平台版本模块变更')
-        self.addToDoItem('业财平台版本模块变更')
-        self.addToDoItem('业财平台版本模块变更')
-        self.ui.ToDoListWidget.itemClicked.connect(self.itemClickedSlot)
+        toDoListWidget = self.ui.ToDoListWidget
+        todoItem = ToDoItem(toDoListWidget, '业财对接支付清算余额上线')
+        self.addToDoItem(todoItem)
+        toDoListWidget.itemClicked.connect(self.itemClickedSlot)
 
-    def addToDoItem(self, todotext):
-        todoItem = ToDoItem(self.ui.ToDoListWidget, todotext)
-        todoItem.setSizeHint(QSize(90,40))
-        self.ui.ToDoListWidget.addItem(todoItem)
+    def addToDoItem(self, todoItem:ToDoItem):
+        todoItem.setMyToDoUi(self)
+        todoItem.setSizeHint(QSize(90, 40))
+        todoItem.parent.addItem(todoItem)
 
     def itemClickedSlot(self, item: ToDoItem):
         item.itemClicked()
