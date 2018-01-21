@@ -1,4 +1,5 @@
 import MyToDo
+import sys
 from StyleSheets import *
 from PyQt5.Qt import *
 
@@ -114,7 +115,6 @@ class ToDoItem(QListWidgetItem):
 class MyToDoUi(QObject):
     def __init__(self, window):
         QObject.__init__(self)
-
         self.ui = MyToDo.Ui_MainWindow()
         self.mainWindow = window
         pal = QPalette()
@@ -129,9 +129,24 @@ class MyToDoUi(QObject):
 
     def init(self):
         toDoListWidget = self.ui.ToDoListWidget
-        todoItem = ToDoItem(toDoListWidget, '业财对接支付清算余额上线')
-        self.addToDoItem(todoItem)
+        todoItem1 = ToDoItem(toDoListWidget, '业财对接支付清算余额上线')
+        todoItem2 = ToDoItem(toDoListWidget, '上线')
+        self.addToDoItem(todoItem1)
+        self.addToDoItem(todoItem2)
         toDoListWidget.itemClicked.connect(self.itemClickedSlot)
+        self.ui.ExitBtn.clicked.connect(self.exit)
+        self.ui.NewItemEdit.returnPressed.connect(self.newItem)
+
+    def newItem(self):
+        todoItem = ToDoItem(self.ui.ToDoListWidget,self.ui.NewItemEdit.text())
+        todoItem.setMyToDoUi(self)
+        todoItem.setSizeHint(QSize(90, 40))
+        todoItem.parent.insertItem(0,todoItem)
+        self.ui.NewItemEdit.clear()
+        print(todoItem.parent.row(todoItem))
+
+    def exit(self):
+        sys.exit()
 
     def addToDoItem(self, todoItem:ToDoItem):
         todoItem.setMyToDoUi(self)
