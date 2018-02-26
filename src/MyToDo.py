@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MyToDo.ui'
 #
-# Created by: PyQt5 UI code generator 5.9.2
+# Created by: PyQt5 UI code generator 5.10
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -51,6 +51,9 @@ class Ui_MainWindow(object):
         self.todoitem_vboxlayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.todoitem_vboxlayout.setContentsMargins(5, 5, 5, 5)
         self.todoitem_vboxlayout.setObjectName("todoitem_vboxlayout")
+        self.InfoLabel = QtWidgets.QLabel(self.verticalLayoutWidget)
+        self.InfoLabel.setObjectName("InfoLabel")
+        self.todoitem_vboxlayout.addWidget(self.InfoLabel)
         self.NewItemEdit = QtWidgets.QLineEdit(self.verticalLayoutWidget)
         self.NewItemEdit.setObjectName("NewItemEdit")
         self.todoitem_vboxlayout.addWidget(self.NewItemEdit)
@@ -79,4 +82,5 @@ class Ui_MainWindow(object):
         self.NewBtn.setText(_translate("MainWindow", "New"))
         self.TitleLabel.setText(_translate("MainWindow", "MyToDo"))
         self.ExitBtn.setText(_translate("MainWindow", "Exit"))
+        self.InfoLabel.setText(_translate("MainWindow", "TextLabel"))
 

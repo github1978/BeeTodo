@@ -3,4 +3,5 @@ QLabel {
     color:white;
     min-width:300px;
     font-family:Microsoft Yahei;
+    background-color:rgb(67, 67, 67);
 }

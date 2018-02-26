@@ -1,4 +1,5 @@
 import os
+import time
 
 
 def getExePath():
@@ -6,6 +7,12 @@ def getExePath():
     if realpath.__contains__('src'):
         realpath = realpath.replace('src', '')
     return realpath
+
+
+def getNowDate():
+    now = int(time.time())
+    timeArray = time.localtime(now)
+    return time.strftime("%Y-%m-%d", timeArray)
 
 
 class FileUtil(object):

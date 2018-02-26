@@ -11,6 +11,7 @@ class StyleSheets(object):
     @staticmethod
     def getShadowEffect():
         shadow_effect = QGraphicsDropShadowEffect()
-        shadow_effect.setOffset(-5, 5)
-        shadow_effect.setColor(Qt.red)
-        shadow_effect.setBlurRadius(8)
+        shadow_effect.setOffset(-2, 3)
+        shadow_effect.setColor(QColor(43, 43, 43))
+        shadow_effect.setBlurRadius(6)
+        return shadow_effect

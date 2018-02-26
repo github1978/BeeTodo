@@ -33,7 +33,7 @@ class ToDoItem(QListWidgetItem):
     DONE_STATE = 1
     TODO_STATE = 0
 
-    def __init__(self, parent: QListWidget=None, todotext='no set', state=TODO_STATE):
+    def __init__(self, parent: QListWidget = None, todotext='no set', state=TODO_STATE):
         QListWidgetItem.__init__(self, parent)
         self.parent = parent
         self.widget = QWidget()
@@ -84,32 +84,32 @@ class ToDoItem(QListWidgetItem):
         doneListWidget = self.mytodo.ui.DoneListWidget
         self.delete()
         self.mytodo.addToDoItem(ToDoItem(doneListWidget, self.text(), self.DONE_STATE))
-        print(self.toDoTextLabel.text()+"已完成")
+        print(self.toDoTextLabel.text() + "已完成")
 
     def delBtnClickedSlot(self):
         self.delete()
-        print(self.toDoTextLabel.text()+"已删除")
+        print(self.toDoTextLabel.text() + "已删除")
 
     def resumeBtnClickedSlot(self):
         toDoListWidget = self.mytodo.ui.ToDoListWidget
         self.delete()
         self.mytodo.addToDoItem(ToDoItem(toDoListWidget, self.text(), self.TODO_STATE))
-        print(self.text()+"已恢复")
+        print(self.text() + "已恢复")
 
     def delete(self):
         self.parent.takeItem(self.parent.row(self))
 
     def importanceCheckedSlot(self, checked):
         if checked:
-            print(self.toDoTextLabel.text()+"重要的")
+            print(self.toDoTextLabel.text() + "重要的")
         else:
-            print(self.toDoTextLabel.text()+"不重要的")
+            print(self.toDoTextLabel.text() + "不重要的")
 
     def urgencyCheckedSlot(self, checked):
         if checked:
-            print(self.toDoTextLabel.text()+"紧急的")
+            print(self.toDoTextLabel.text() + "紧急的")
         else:
-            print(self.toDoTextLabel.text()+"不紧急的")
+            print(self.toDoTextLabel.text() + "不紧急的")
 
 
 class MyToDoUi(QObject):
@@ -126,6 +126,9 @@ class MyToDoUi(QObject):
         self.ui.ToDoListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.ui.DoneListWidget.maximumHeight = 290
         self.ui.DoneListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.ui.TitleLabel.setGraphicsEffect(StyleSheets.getShadowEffect())
+        self.ui.InfoLabel.setStyleSheet(StyleSheets.getCSS('INFO_LABEL'))
+        self.ui.InfoLabel.setText('今天是: ' + utils.getNowDate())
 
     def init(self):
         toDoListWidget = self.ui.ToDoListWidget
@@ -138,19 +141,21 @@ class MyToDoUi(QObject):
         self.ui.NewItemEdit.returnPressed.connect(self.newItem)
 
     def newItem(self):
-        todoItem = ToDoItem(self.ui.ToDoListWidget,self.ui.NewItemEdit.text())
+        if not self.ui.NewItemEdit.text().strip():
+            return
+        todoItem = ToDoItem(self.ui.ToDoListWidget, self.ui.NewItemEdit.text())
         todoItem.setMyToDoUi(self)
-        todoItem.setSizeHint(QSize(90, 40))
-        todoItem.parent.insertItem(0,todoItem)
+        todoItem.setSizeHint(QSize(90, 30))
+        todoItem.parent.insertItem(0, todoItem)
         self.ui.NewItemEdit.clear()
         print(todoItem.parent.row(todoItem))
 
     def exit(self):
         sys.exit()
 
-    def addToDoItem(self, todoItem:ToDoItem):
+    def addToDoItem(self, todoItem: ToDoItem):
         todoItem.setMyToDoUi(self)
-        todoItem.setSizeHint(QSize(90, 40))
+        todoItem.setSizeHint(QSize(90, 30))
         todoItem.parent.addItem(todoItem)
 
     def itemClickedSlot(self, item: ToDoItem):
