@@ -34,9 +34,9 @@ class Ui_MainWindow(object):
         self.todohead_hboxlayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
         self.todohead_hboxlayout.setContentsMargins(5, 5, 5, 5)
         self.todohead_hboxlayout.setObjectName("todohead_hboxlayout")
-        self.NewBtn = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        self.NewBtn.setObjectName("NewBtn")
-        self.todohead_hboxlayout.addWidget(self.NewBtn)
+        self.LockBtn = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.LockBtn.setObjectName("LockBtn")
+        self.todohead_hboxlayout.addWidget(self.LockBtn)
         self.TitleLabel = QtWidgets.QLabel(self.verticalLayoutWidget)
         self.TitleLabel.setStyleSheet("color:white;\n"
 "font:bold;")
@@ -79,8 +79,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.NewBtn.setText(_translate("MainWindow", "New"))
+        self.LockBtn.setText(_translate("MainWindow", "锁定"))
         self.TitleLabel.setText(_translate("MainWindow", "MyToDo"))
-        self.ExitBtn.setText(_translate("MainWindow", "Exit"))
+        self.ExitBtn.setText(_translate("MainWindow", "关闭"))
         self.InfoLabel.setText(_translate("MainWindow", "TextLabel"))
 

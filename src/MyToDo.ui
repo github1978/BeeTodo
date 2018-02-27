@@ -59,9 +59,9 @@
         <number>5</number>
        </property>
        <item>
-        <widget class="QPushButton" name="NewBtn">
+        <widget class="QPushButton" name="LockBtn">
          <property name="text">
-          <string>New</string>
+          <string>锁定</string>
          </property>
         </widget>
        </item>
@@ -82,7 +82,7 @@ font:bold;</string>
        <item>
         <widget class="QPushButton" name="ExitBtn">
          <property name="text">
-          <string>Exit</string>
+          <string>关闭</string>
          </property>
         </widget>
        </item>

@@ -11,6 +11,8 @@ def getTransLucentColor(num):
 
 
 class MyMainWindow(QMainWindow):
+    isLocked = False
+
     def __init__(self):
         QMainWindow.__init__(self)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -28,6 +30,12 @@ class MyMainWindow(QMainWindow):
             self.move(event.globalPos() - self.dragPosition)
             event.accept()
 
+    def eventFilter(self, obj, evt: QEvent):
+        if obj == self:
+            if evt.type() == QEvent.MouseMove:
+                return True
+        return QMainWindow.eventFilter(self, obj, evt)
+
 
 class ToDoItem(QListWidgetItem):
     DONE_STATE = 1
@@ -37,6 +45,7 @@ class ToDoItem(QListWidgetItem):
         QListWidgetItem.__init__(self, parent)
         self.parent = parent
         self.widget = QWidget()
+        # self.widget.setStyle()
         self.hLayout = QHBoxLayout()
         self.toDoTextLabel = QLabel()
         self.toDoTextLabel.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_LABEL'))
@@ -113,7 +122,7 @@ class ToDoItem(QListWidgetItem):
 
 
 class MyToDoUi(QObject):
-    def __init__(self, window):
+    def __init__(self, window: MyMainWindow):
         QObject.__init__(self)
         self.ui = MyToDo.Ui_MainWindow()
         self.mainWindow = window
@@ -129,6 +138,7 @@ class MyToDoUi(QObject):
         self.ui.TitleLabel.setGraphicsEffect(StyleSheets.getShadowEffect())
         self.ui.InfoLabel.setStyleSheet(StyleSheets.getCSS('INFO_LABEL'))
         self.ui.InfoLabel.setText('今天是: ' + utils.getNowDate())
+        self.ui.LockBtn.setText("已解锁")
 
     def init(self):
         toDoListWidget = self.ui.ToDoListWidget
@@ -138,7 +148,19 @@ class MyToDoUi(QObject):
         self.addToDoItem(todoItem2)
         toDoListWidget.itemClicked.connect(self.itemClickedSlot)
         self.ui.ExitBtn.clicked.connect(self.exit)
+        self.ui.LockBtn.clicked.connect(self.lockPoint)
         self.ui.NewItemEdit.returnPressed.connect(self.newItem)
+
+    def lockPoint(self):
+        print(self.mainWindow.isLocked)
+        if self.mainWindow.isLocked:
+            self.mainWindow.removeEventFilter(self.mainWindow)
+            self.mainWindow.isLocked = False
+            self.ui.LockBtn.setText("已解锁")
+        else:
+            self.ui.LockBtn.setText("已锁定")
+            self.mainWindow.isLocked = True
+            self.mainWindow.installEventFilter(self.mainWindow)
 
     def newItem(self):
         if not self.ui.NewItemEdit.text().strip():
