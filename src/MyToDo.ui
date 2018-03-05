@@ -113,7 +113,25 @@ font:bold;</string>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="NewItemEdit"/>
+        <layout class="QHBoxLayout" name="newitem_hboxlayout">
+         <item>
+          <widget class="QLineEdit" name="NewItemEdit"/>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="newitem_i_checkbox">
+           <property name="text">
+            <string>要</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="newitem_e_checkBox">
+           <property name="text">
+            <string>紧</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QListWidget" name="ToDoListWidget">

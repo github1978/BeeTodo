@@ -39,6 +39,7 @@ class MyMainWindow(QMainWindow):
 
 class ToDoItem(QListWidgetItem):
     DONE_STATE = 1
+    ALTER_STATE = 2
     TODO_STATE = 0
 
     def __init__(self, parent: QListWidget = None, todotext='no set', state=TODO_STATE):
@@ -50,7 +51,7 @@ class ToDoItem(QListWidgetItem):
         self.toDoTextLabel = QLabel()
         self.toDoTextLabel.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_LABEL'))
         self.toDoTextLabel.setText(todotext)
-        self.toDoTextLabel.setGraphicsEffect(StyleSheets.getShadowEffect())
+        self.widget.setGraphicsEffect(StyleSheets.getShadowEffect())
         self.state = state
         if state == self.TODO_STATE:
             self.doneBtn = QPushButton()
@@ -61,15 +62,17 @@ class ToDoItem(QListWidgetItem):
             self.delBtn.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_BTN'))
             self.doneBtn.clicked.connect(self.doneBtnClickedSlot)
             self.delBtn.clicked.connect(self.delBtnClickedSlot)
-            self.importanceCheckBox = QCheckBox()
             self.urgencyCheckBox = QCheckBox()
+            self.importanceCheckBox = QCheckBox()
             self.hLayout.addWidget(self.doneBtn, 0)
             self.hLayout.addWidget(self.delBtn, 1)
             self.hLayout.addWidget(self.toDoTextLabel, 2)
             self.hLayout.addWidget(self.importanceCheckBox, 3)
             self.hLayout.addWidget(self.urgencyCheckBox, 4)
-            self.importanceCheckBox.clicked.connect(self.importanceCheckedSlot)
+            self.urgencyCheckBox.setText("紧")
+            self.importanceCheckBox.setText("要")
             self.urgencyCheckBox.clicked.connect(self.urgencyCheckedSlot)
+            self.importanceCheckBox.clicked.connect(self.importanceCheckedSlot)
         else:
             self.resumeBtn = QPushButton()
             self.resumeBtn.setText('R')
@@ -83,8 +86,27 @@ class ToDoItem(QListWidgetItem):
     def setMyToDoUi(self, mytodo):
         self.mytodo = mytodo
 
+    def setUrgency(self, boolvalue):
+        self.urgencyCheckBox.setChecked(boolvalue)
+
+    def setImportant(self, boolvalue):
+        self.importanceCheckBox.setChecked(boolvalue)
+
     def itemClicked(self):
         print(self.toDoTextLabel.text())
+
+    def itemDoubleClicked(self):
+        if self.state != self.ALTER_STATE:
+            self.hLayout.removeWidget(self.toDoTextLabel)
+            self.toDoTextLabel.deleteLater()
+            input = QLineEdit()
+            input.setFixedSize(290, 10)
+            self.hLayout.insertWidget(2, input)
+            self.doneBtn.setEnabled(False)
+            self.delBtn.setEnabled(False)
+            self.importanceCheckBox.setEnabled(False)
+            self.urgencyCheckBox.setEnabled(False)
+            self.state = self.ALTER_STATE
 
     def text(self):
         return self.toDoTextLabel.text()
@@ -132,12 +154,12 @@ class MyToDoUi(QObject):
         self.ui.centralwidget.setAutoFillBackground(True)
         self.ui.centralwidget.setPalette(pal)
         self.ui.ToDoListWidget.maximumHeight = 290
-        self.ui.ToDoListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.ui.ToDoListWidget.verticalScrollBar().setStyleSheet(StyleSheets.getCSS("TODO_LIST_WIDGET_SCROLLBAR"))
         self.ui.DoneListWidget.maximumHeight = 290
-        self.ui.DoneListWidget.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.ui.DoneListWidget.verticalScrollBar().setStyleSheet(StyleSheets.getCSS("TODO_LIST_WIDGET_SCROLLBAR"))
         self.ui.TitleLabel.setGraphicsEffect(StyleSheets.getShadowEffect())
         self.ui.InfoLabel.setStyleSheet(StyleSheets.getCSS('INFO_LABEL'))
-        self.ui.InfoLabel.setText('今天是: ' + utils.getNowDate())
+        self.timer = QTimer(self)
         self.ui.LockBtn.setText("已解锁")
 
     def init(self):
@@ -146,10 +168,13 @@ class MyToDoUi(QObject):
         todoItem2 = ToDoItem(toDoListWidget, '上线')
         self.addToDoItem(todoItem1)
         self.addToDoItem(todoItem2)
-        toDoListWidget.itemClicked.connect(self.itemClickedSlot)
+        toDoListWidget.itemDoubleClicked.connect(self.itemDoubleClickedSlot)
         self.ui.ExitBtn.clicked.connect(self.exit)
         self.ui.LockBtn.clicked.connect(self.lockPoint)
         self.ui.NewItemEdit.returnPressed.connect(self.newItem)
+        self.updateDate()
+        self.timer.timeout.connect(self.updateDate)
+        self.timer.start(5000)
 
     def lockPoint(self):
         print(self.mainWindow.isLocked)
@@ -168,8 +193,12 @@ class MyToDoUi(QObject):
         todoItem = ToDoItem(self.ui.ToDoListWidget, self.ui.NewItemEdit.text())
         todoItem.setMyToDoUi(self)
         todoItem.setSizeHint(QSize(90, 30))
+        todoItem.setImportant(self.ui.newitem_i_checkbox.isChecked())
+        todoItem.setUrgency(self.ui.newitem_e_checkBox.isChecked())
         todoItem.parent.insertItem(0, todoItem)
         self.ui.NewItemEdit.clear()
+        self.ui.newitem_i_checkbox.setChecked(False)
+        self.ui.newitem_e_checkBox.setChecked(False)
         print(todoItem.parent.row(todoItem))
 
     def exit(self):
@@ -183,6 +212,12 @@ class MyToDoUi(QObject):
     def itemClickedSlot(self, item: ToDoItem):
         item.itemClicked()
 
+    def itemDoubleClickedSlot(self, item: ToDoItem):
+        item.itemDoubleClicked()
+
     def showMainWindow(self):
         self.mainWindow.show()
         return self
+
+    def updateDate(self):
+        self.ui.InfoLabel.setText('今天是: ' + QDateTime.currentDateTime().toString("yyyy-MM-dd dddd"))
