@@ -148,6 +148,13 @@ border:0;</string>
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="ExportToDay">
+         <property name="text">
+          <string>导出今日工作</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QListWidget" name="DoneListWidget">
          <property name="styleSheet">
           <string notr="true">background-color:transparent;

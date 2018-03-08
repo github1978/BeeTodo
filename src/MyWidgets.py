@@ -18,6 +18,10 @@ class MyMainWindow(QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(self.height(), self.width())
+        self.ui = QObject()
+
+    def setUi(self, myui):
+        self.ui = myui
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -29,6 +33,9 @@ class MyMainWindow(QMainWindow):
         if event.buttons() == Qt.LeftButton:
             self.move(event.globalPos() - self.dragPosition)
             event.accept()
+
+    def keyPressEvent(self, *args, **kwargs):
+        self.ui.newItem()
 
     def eventFilter(self, obj, evt: QEvent):
         if obj == self:
@@ -148,6 +155,7 @@ class MyToDoUi(QObject):
         QObject.__init__(self)
         self.ui = MyToDo.Ui_MainWindow()
         self.mainWindow = window
+        self.mainWindow.setUi(self)
         pal = QPalette()
         pal.setBrush(pal.Background, getTransLucentColor(0.1))
         self.ui.setupUi(self.mainWindow)
@@ -171,7 +179,6 @@ class MyToDoUi(QObject):
         toDoListWidget.itemDoubleClicked.connect(self.itemDoubleClickedSlot)
         self.ui.ExitBtn.clicked.connect(self.exit)
         self.ui.LockBtn.clicked.connect(self.lockPoint)
-        self.ui.NewItemEdit.returnPressed.connect(self.newItem)
         self.updateDate()
         self.timer.timeout.connect(self.updateDate)
         self.timer.start(5000)
@@ -200,6 +207,9 @@ class MyToDoUi(QObject):
         self.ui.newitem_i_checkbox.setChecked(False)
         self.ui.newitem_e_checkBox.setChecked(False)
         print(todoItem.parent.row(todoItem))
+
+    def sortItem(self):
+        pass
 
     def exit(self):
         sys.exit()

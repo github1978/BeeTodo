@@ -73,6 +73,9 @@ class Ui_MainWindow(object):
         self.ToDoListWidget.setAutoScroll(True)
         self.ToDoListWidget.setObjectName("ToDoListWidget")
         self.todoitem_vboxlayout.addWidget(self.ToDoListWidget)
+        self.ExportToDay = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.ExportToDay.setObjectName("ExportToDay")
+        self.todoitem_vboxlayout.addWidget(self.ExportToDay)
         self.DoneListWidget = QtWidgets.QListWidget(self.verticalLayoutWidget)
         self.DoneListWidget.setStyleSheet("background-color:transparent;\n"
 "border:0;")
@@ -94,4 +97,5 @@ class Ui_MainWindow(object):
         self.InfoLabel.setText(_translate("MainWindow", "TextLabel"))
         self.newitem_i_checkbox.setText(_translate("MainWindow", "要"))
         self.newitem_e_checkBox.setText(_translate("MainWindow", "紧"))
+        self.ExportToDay.setText(_translate("MainWindow", "导出今日工作"))
 
