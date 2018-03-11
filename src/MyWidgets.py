@@ -2,6 +2,7 @@ import MyToDo
 import sys
 from StyleSheets import *
 from PyQt5.Qt import *
+from controller import *
 
 
 def getTransLucentColor(num):
@@ -43,6 +44,9 @@ class MyMainWindow(QMainWindow):
                 return True
         return QMainWindow.eventFilter(self, obj, evt)
 
+    def serialize(self):
+        return str((self.id, self.todo, self.imp, self.emg, self.state, self.create_date, self.sort))
+
 
 class ToDoItem(QListWidgetItem):
     DONE_STATE = 1
@@ -59,7 +63,7 @@ class ToDoItem(QListWidgetItem):
         self.toDoTextLabel.setStyleSheet(StyleSheets.getCSS('TODO_LIST_WIDGET_ITEM_LABEL'))
         self.toDoTextLabel.setText(todotext)
         self.widget.setGraphicsEffect(StyleSheets.getShadowEffect())
-        self.state = state
+
         if state == self.TODO_STATE:
             self.doneBtn = QPushButton()
             self.doneBtn.setText('√')
@@ -89,6 +93,13 @@ class ToDoItem(QListWidgetItem):
             self.hLayout.addWidget(self.toDoTextLabel, 1)
         self.widget.setLayout(self.hLayout)
         self.parent.setItemWidget(self, self.widget)
+        self.id = int(time.time())
+        self.todo = todotext
+        self.imp = 0
+        self.emg = 0
+        self.state = state
+        self.create_date = utils.getNowDate("%Y-%m-%d %H:%M:%S")
+        self.sort = 0
 
     def setMyToDoUi(self, mytodo):
         self.mytodo = mytodo
@@ -207,6 +218,9 @@ class MyToDoUi(QObject):
         self.ui.newitem_i_checkbox.setChecked(False)
         self.ui.newitem_e_checkBox.setChecked(False)
         print(todoItem.parent.row(todoItem))
+        item_list = []
+        item_list.append(todoItem)
+        saveItems(item_list)
 
     def sortItem(self):
         pass

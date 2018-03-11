@@ -9,10 +9,11 @@ def getExePath():
     return realpath
 
 
-def getNowDate():
+def getNowDate(format_time):
+    # "%Y-%m-%d"
     now = int(time.time())
     timeArray = time.localtime(now)
-    return time.strftime("%Y-%m-%d", timeArray)
+    return time.strftime(format_time, timeArray)
 
 
 class FileUtil(object):
