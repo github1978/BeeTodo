@@ -3,6 +3,7 @@ import sys
 from StyleSheets import *
 from PyQt5.Qt import *
 from controller import *
+import time
 
 
 def getTransLucentColor(num):
@@ -43,9 +44,6 @@ class MyMainWindow(QMainWindow):
             if evt.type() == QEvent.MouseMove:
                 return True
         return QMainWindow.eventFilter(self, obj, evt)
-
-    def serialize(self):
-        return str((self.id, self.todo, self.imp, self.emg, self.state, self.create_date, self.sort))
 
 
 class ToDoItem(QListWidgetItem):
@@ -105,10 +103,12 @@ class ToDoItem(QListWidgetItem):
         self.mytodo = mytodo
 
     def setUrgency(self, boolvalue):
-        self.urgencyCheckBox.setChecked(boolvalue)
+        self.emg = int(boolvalue)
+        self.urgencyCheckBox.setChecked(False if int(boolvalue) == 0 else True)
 
     def setImportant(self, boolvalue):
-        self.importanceCheckBox.setChecked(boolvalue)
+        self.imp = int(boolvalue)
+        self.importanceCheckBox.setChecked(False if int(boolvalue) == 0 else True)
 
     def itemClicked(self):
         print(self.toDoTextLabel.text())
@@ -131,7 +131,7 @@ class ToDoItem(QListWidgetItem):
 
     def doneBtnClickedSlot(self):
         doneListWidget = self.mytodo.ui.DoneListWidget
-        self.delete()
+        self.parent.takeItem(self.parent.row(self))
         self.mytodo.addToDoItem(ToDoItem(doneListWidget, self.text(), self.DONE_STATE))
         print(self.toDoTextLabel.text() + "已完成")
 
@@ -141,12 +141,13 @@ class ToDoItem(QListWidgetItem):
 
     def resumeBtnClickedSlot(self):
         toDoListWidget = self.mytodo.ui.ToDoListWidget
-        self.delete()
+        self.parent.takeItem(self.parent.row(self))
         self.mytodo.addToDoItem(ToDoItem(toDoListWidget, self.text(), self.TODO_STATE))
         print(self.text() + "已恢复")
 
     def delete(self):
         self.parent.takeItem(self.parent.row(self))
+        delItems([self.serialize()])
 
     def importanceCheckedSlot(self, checked):
         if checked:
@@ -159,6 +160,25 @@ class ToDoItem(QListWidgetItem):
             print(self.toDoTextLabel.text() + "紧急的")
         else:
             print(self.toDoTextLabel.text() + "不紧急的")
+
+    def setToDo(self, todo_text):
+        self.todo = todo_text
+        self.toDoTextLabel.setText(todo_text)
+
+    def serialize(self):
+        return {'id': self.id, 'todo': self.todo, 'imp': self.imp,
+                'emg': self.emg, 'state': self.state, 'create_date': self.create_date,
+                'sort': self.sort}
+
+    def unserialize(self, item_data):
+        self.id = item_data['id']
+        self.state = item_data['state']
+        self.create_date = item_data['create_date']
+        self.sort = item_data['sort']
+        self.setUrgency(item_data['emg'])
+        self.setImportant(item_data['imp'])
+        self.setToDo(item_data['todo'])
+        return self
 
 
 class MyToDoUi(QObject):
@@ -182,12 +202,10 @@ class MyToDoUi(QObject):
         self.ui.LockBtn.setText("已解锁")
 
     def init(self):
-        toDoListWidget = self.ui.ToDoListWidget
-        todoItem1 = ToDoItem(toDoListWidget, '业财对接支付清算余额上线')
-        todoItem2 = ToDoItem(toDoListWidget, '上线')
-        self.addToDoItem(todoItem1)
-        self.addToDoItem(todoItem2)
-        toDoListWidget.itemDoubleClicked.connect(self.itemDoubleClickedSlot)
+        to_do_list_widget = self.ui.ToDoListWidget
+        for item in queryItems():
+            self.addToDoItem(ToDoItem(to_do_list_widget).unserialize(item))
+        to_do_list_widget.itemDoubleClicked.connect(self.itemDoubleClickedSlot)
         self.ui.ExitBtn.clicked.connect(self.exit)
         self.ui.LockBtn.clicked.connect(self.lockPoint)
         self.updateDate()
@@ -209,29 +227,27 @@ class MyToDoUi(QObject):
         if not self.ui.NewItemEdit.text().strip():
             return
         todoItem = ToDoItem(self.ui.ToDoListWidget, self.ui.NewItemEdit.text())
-        todoItem.setMyToDoUi(self)
-        todoItem.setSizeHint(QSize(90, 30))
         todoItem.setImportant(self.ui.newitem_i_checkbox.isChecked())
         todoItem.setUrgency(self.ui.newitem_e_checkBox.isChecked())
-        todoItem.parent.insertItem(0, todoItem)
+        self.addToDoItem(todoItem)
         self.ui.NewItemEdit.clear()
         self.ui.newitem_i_checkbox.setChecked(False)
         self.ui.newitem_e_checkBox.setChecked(False)
         print(todoItem.parent.row(todoItem))
-        item_list = []
-        item_list.append(todoItem)
+        item_list = [tuple(todoItem.serialize().values())]
         saveItems(item_list)
 
     def sortItem(self):
         pass
 
     def exit(self):
+        closeDbConn()
         sys.exit()
 
     def addToDoItem(self, todoItem: ToDoItem):
         todoItem.setMyToDoUi(self)
         todoItem.setSizeHint(QSize(90, 30))
-        todoItem.parent.addItem(todoItem)
+        todoItem.parent.insertItem(0, todoItem)
 
     def itemClickedSlot(self, item: ToDoItem):
         item.itemClicked()

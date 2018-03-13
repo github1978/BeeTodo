@@ -1,48 +1,61 @@
 import sqlite3
 import utils
-import time
-from MyWidgets import ToDoItem
 
 TDITEMS_TABLE_NAME = "TDITEMS"
 
+
+def dict_factory(cursor, row):
+    return dict((col[0], row[idx]) for idx, col in enumerate(cursor.description))
+
+
 conn = sqlite3.connect(utils.getExePath() + 'mytodo.db')
+conn.row_factory = dict_factory
 
 
 def sortToDoItems(items):
     pass
 
 
-def queryItems(items):
-    pass
+def queryItems(wheresql=None):
+    if wheresql is None:
+        return excuteSql("select * from " + TDITEMS_TABLE_NAME).fetchall()
+    else:
+        return excuteSql("select * from " + TDITEMS_TABLE_NAME + "where " + wheresql).fetchall()
 
 
 def saveItems(items: list):
-    values_str = ""
+    sql = "insert into " + TDITEMS_TABLE_NAME + " values (?,?,?,?,?,?,?)"
+    conn.executemany(sql, items)
+    conn.commit()
+
+
+def delItems(items: list):
+    list_ids = []
     for item in items:
-        if values_str == "":
-            values_str = values_str + item.serialize()
-        else:
-            values_str = values_str + "," + item.serialize()
-    sql = "insert into " + TDITEMS_TABLE_NAME + "values " + values_str
+        list_ids.append(item['id'])
+    sql = "delete from " + TDITEMS_TABLE_NAME + " where id in " + str(tuple(list_ids)).replace(',)', ')')
     excuteSql(sql)
-
-
-def delItems(items):
-    pass
 
 
 def exportItems(items):
     pass
 
 
-def excuteSql(sql: str):
-    cur = conn.cursor()
-    cur.execute(sql)
+def closeDbConn():
     conn.close()
 
 
+def excuteSql(sql):
+    try:
+        temp = conn.execute(sql)
+        conn.commit()
+        return temp
+    except Exception as e:
+        print(e)
+
+
 if __name__ == '__main__':
-    excuteSql(
+    conn.execute(
         '''
         CREATE TABLE TDITEMS
         (
