@@ -3,7 +3,7 @@ import sys
 import time
 from StyleSheets import *
 from PyQt5.Qt import *
-from controller import *
+from service import *
 
 
 def getTransLucentColor(num):
