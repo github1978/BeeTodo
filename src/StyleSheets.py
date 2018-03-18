@@ -6,7 +6,7 @@ class StyleSheets(object):
 
     @staticmethod
     def getCSS(cssfilename):
-        return utils.FileUtil().readFile(utils.getExePath()+"/css/" + cssfilename + ".css")
+        return utils.FileUtil().readFile(utils.getExePath() + "/css/" + cssfilename + ".css")
 
     @staticmethod
     def getShadowEffect():

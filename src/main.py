@@ -1,5 +1,5 @@
 import sys
-from MyWidgets import MyMainWindow, MyToDoUi, QApplication
+from MyWidgets import MyMainWindow, MyToDoUi
 from StyleSheets import *
 
 

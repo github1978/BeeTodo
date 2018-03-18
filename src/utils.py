@@ -1,6 +1,8 @@
 import os
 import time
 
+from PyQt5.QtCore import QDateTime
+
 
 def getExePath():
     realpath = os.path.split(os.path.realpath(__file__))[0]
@@ -14,6 +16,10 @@ def getNowDate(format_time):
     now = int(time.time())
     timeArray = time.localtime(now)
     return time.strftime(format_time, timeArray)
+
+
+def getNowQDate(format_time):
+    return QDateTime.currentDateTime().toString(format_time)
 
 
 class FileUtil(object):
