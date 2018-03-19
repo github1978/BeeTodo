@@ -23,6 +23,8 @@ options = {
     },
 
 }
+
+# TCL_LIBRARY,TK_LIBRARY 的路径换成本地对应版本的路径。
 os.environ['TCL_LIBRARY'] = r'C:\Users\Administrator\AppData\Local\Programs\Python\Python36-32\tcl\tcl8.6'
 os.environ['TK_LIBRARY'] = r'C:\Users\Administrator\AppData\Local\Programs\Python\Python36-32\tcl\tk8.6'
 setup(

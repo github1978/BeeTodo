@@ -1,3 +1,5 @@
+import configparser
+
 import MyToDo
 import sys
 import time
@@ -17,7 +19,10 @@ class MyMainWindow(QMainWindow):
 
     def __init__(self):
         QMainWindow.__init__(self)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.FramelessWindowHint
+                            | Qt.WindowStaysOnBottomHint
+                            | Qt.X11BypassWindowManagerHint
+                            | Qt.Tool)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(self.height(), self.width())
         self.ui = QObject()
@@ -209,6 +214,8 @@ class ToDoItem(QListWidgetItem):
 
 class MyToDoUi(QObject):
     selected_item: ToDoItem = None
+    cf = configparser.ConfigParser()
+    normal_section = "normal"
 
     def __init__(self, window: MyMainWindow):
         QObject.__init__(self)
@@ -239,12 +246,13 @@ class MyToDoUi(QObject):
         self.updateDate()
         self.timer.timeout.connect(self.updateDate)
         self.timer.start(5000)
+        self.loadConfig()
 
     def exportTodayDoneTodos(self):
         item_count = self.ui.DoneListWidget.count()
         export_result = ""
         for row_index in range(item_count):
-            export_result = export_result + str(row_index+1) + ". " \
+            export_result = export_result + str(row_index + 1) + ". " \
                             + self.ui.DoneListWidget.item(row_index).text() + "。\n"
         self.export_dialog.export_area.setText(export_result)
         self.export_dialog.exec()
@@ -289,6 +297,7 @@ class MyToDoUi(QObject):
 
     def exit(self):
         closeDbConn()
+        self.applyConfig()
         sys.exit()
 
     def addToDoItem(self, todoItem: ToDoItem):
@@ -312,3 +321,30 @@ class MyToDoUi(QObject):
 
     def updateDate(self):
         self.ui.InfoLabel.setText('今天是: ' + QDateTime.currentDateTime().toString("yyyy-MM-dd dddd"))
+
+    def loadConfig(self):
+        self.cf.read("BeeTodo.config")
+        try:
+            current_location = self.cf.get(self.normal_section, "current_location").split(",")
+            if current_location[0] != "":
+                self.mainWindow.move(int(current_location[0]), int(current_location[1]))
+            lock = self.cf.get(self.normal_section, "lock")
+            if lock is not None:
+                self.mainWindow.isLocked = True if lock == "False" else False
+                self.lockPoint()
+        except Exception as e:
+            print(e)
+            pass
+
+    def applyConfig(self):
+        window_pos = self.mainWindow.pos()
+        try:
+            self.cf.set(self.normal_section, "current_location",
+                        str(window_pos.x()) + "," + str(window_pos.y()))
+            self.cf.set(self.normal_section, "lock",
+                        str(self.mainWindow.isLocked))
+            with open("BeeTodo.config", "w") as configfile:
+                self.cf.write(configfile)
+        except Exception as e:
+            print(e)
+            pass
