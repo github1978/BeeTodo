@@ -20,7 +20,8 @@ conn.execute(
     emg  CHAR(50),
     state INT,
     create_date TEXT,
-    sort INT
+    sort INT,
+    end_date TEXT
     );
     '''
 )
@@ -60,7 +61,7 @@ def queryItems(wheresql=""):
 
 
 def saveItems(items: list):
-    sql = "insert into " + TDITEMS_TABLE_NAME + " values (?,?,?,?,?,?,?)"
+    sql = "insert into " + TDITEMS_TABLE_NAME + " values (?,?,?,?,?,?,?,?)"
     try:
         conn.executemany(sql, items)
         conn.commit()
@@ -93,20 +94,3 @@ def excuteSql(sql):
     except Exception as e:
         conn.rollback()
         print(e)
-
-
-if __name__ == '__main__':
-    conn.execute(
-        '''
-        CREATE TABLE TDITEMS
-        (
-        id INT PRIMARY KEY NOT NULL,
-        todo TEXT NOT NULL,
-        imp  CHAR(50),
-        emg  CHAR(50),
-        state INT,
-        create_date TEXT,
-        sort INT
-        );
-        '''
-    )

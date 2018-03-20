@@ -2,6 +2,7 @@ import configparser
 
 import MyToDo
 import sys
+import os
 import time
 from StyleSheets import *
 from PyQt5.Qt import *
@@ -17,8 +18,8 @@ def getTransLucentColor(num):
 class MyMainWindow(QMainWindow):
     isLocked = False
 
-    def __init__(self):
-        QMainWindow.__init__(self)
+    def __init__(self, parent=None):
+        QMainWindow.__init__(self, parent)
         self.setWindowFlags(Qt.FramelessWindowHint
                             | Qt.WindowStaysOnBottomHint
                             | Qt.X11BypassWindowManagerHint
@@ -67,7 +68,7 @@ class MyDialog(QDialog):
         self.setLayout(self.hbox_layout)
 
     def closeDialogSlot(self):
-        self.close()
+        self.hide()
 
 
 class ToDoItem(QListWidgetItem):
@@ -122,6 +123,7 @@ class ToDoItem(QListWidgetItem):
         self.state = state
         self.create_date = utils.getNowDate("%Y-%m-%d %H:%M:%S")
         self.sort = 0
+        self.end_date = ""
 
     def setMyToDoUi(self, mytodo):
         self.mytodo = mytodo
@@ -157,6 +159,7 @@ class ToDoItem(QListWidgetItem):
         doneListWidget = self.mytodo.ui.DoneListWidget
         self.parent.takeItem(self.parent.row(self))
         self.state = self.DONE_STATE
+        self.end_date = utils.getNowDate("%Y-%m-%d %H:%M:%S")
         self.mytodo.addToDoItem(
             ToDoItem(doneListWidget, self.text(), self.DONE_STATE).unserialize(self.serialize()))
         updateItems([self.serialize()])
@@ -198,7 +201,7 @@ class ToDoItem(QListWidgetItem):
     def serialize(self):
         return {'id': self.id, 'todo': self.todo, 'imp': self.imp,
                 'emg': self.emg, 'state': self.state, 'create_date': self.create_date,
-                'sort': self.sort}
+                'sort': self.sort, 'end_date':self.end_date}
 
     def unserialize(self, item_data):
         self.id = item_data['id']
@@ -209,6 +212,7 @@ class ToDoItem(QListWidgetItem):
             self.setUrgency(item_data['emg'])
             self.setImportant(item_data['imp'])
         self.setToDo(item_data['todo'])
+        self.end_date = item_data['end_date']
         return self
 
 
@@ -216,6 +220,7 @@ class MyToDoUi(QObject):
     selected_item: ToDoItem = None
     cf = configparser.ConfigParser()
     normal_section = "normal"
+    config_file_name = "BeeTodo.config"
 
     def __init__(self, window: MyMainWindow):
         QObject.__init__(self)
@@ -260,7 +265,8 @@ class MyToDoUi(QObject):
     def reload(self):
         self.ui.ToDoListWidget.clear()
         self.ui.DoneListWidget.clear()
-        for item in queryItems("and date(create_date)='" + utils.getNowQDate("yyyy-MM-dd") + "'"):
+        where_sql = "and state=0 or date(end_date)='" + utils.getNowQDate("yyyy-MM-dd") + "'"
+        for item in queryItems(where_sql):
             if item['state'] == ToDoItem.TODO_STATE:
                 todo_item = ToDoItem(self.ui.ToDoListWidget)
             elif item['state'] == ToDoItem.DONE_STATE:
@@ -323,7 +329,13 @@ class MyToDoUi(QObject):
         self.ui.InfoLabel.setText('今天是: ' + QDateTime.currentDateTime().toString("yyyy-MM-dd dddd"))
 
     def loadConfig(self):
-        self.cf.read("BeeTodo.config")
+        if not os.path.exists(self.config_file_name):
+            self.cf.add_section(self.normal_section)
+            self.cf.set(self.normal_section, "current_location", "")
+            self.cf.set(self.normal_section, "lock", "False")
+            with open(self.config_file_name, "w") as configFile:
+                self.cf.write(configFile)
+        self.cf.read(self.config_file_name)
         try:
             current_location = self.cf.get(self.normal_section, "current_location").split(",")
             if current_location[0] != "":
@@ -343,7 +355,7 @@ class MyToDoUi(QObject):
                         str(window_pos.x()) + "," + str(window_pos.y()))
             self.cf.set(self.normal_section, "lock",
                         str(self.mainWindow.isLocked))
-            with open("BeeTodo.config", "w") as configfile:
+            with open(self.config_file_name, "w") as configfile:
                 self.cf.write(configfile)
         except Exception as e:
             print(e)

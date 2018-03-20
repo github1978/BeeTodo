@@ -7,14 +7,14 @@ base = 'WIN32GUI' if sys.platform == "win32" else None
 
 executables = [Executable("src/BeeTodo.py", base=base)]
 
-packages = ["PyQt5", "sqlite3"]
+packages = ["PyQt5", "sqlite3", "configparser"]
 include_files = [
     "css",
     "src/MyWidgets.py",
     "src/MyToDo.py",
     "src/service.py",
     "src/utils.py",
-    "src/StyleSheets.py",
+    "src/StyleSheets.py"
 ]
 options = {
     'build_exe': {
