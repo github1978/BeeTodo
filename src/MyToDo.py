@@ -17,6 +17,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
+        MainWindow.setMinimumSize(QtCore.QSize(480, 640))
         font = QtGui.QFont()
         font.setFamily("Microsoft YaHei")
         MainWindow.setFont(font)

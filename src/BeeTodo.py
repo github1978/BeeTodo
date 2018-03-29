@@ -2,7 +2,6 @@ import sys
 from MyWidgets import MyMainWindow, MyToDoUi
 from StyleSheets import *
 
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setStyleSheet(StyleSheets.getCSS('GLOBAL'))

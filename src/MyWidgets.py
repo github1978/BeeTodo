@@ -1,5 +1,6 @@
 import configparser
 
+import win32gui
 import MyToDo
 import sys
 import os
@@ -15,21 +16,23 @@ def getTransLucentColor(num):
     return color
 
 
+# noinspection PyAttributeOutsideInit,PyCallByClass
 class MyMainWindow(QMainWindow):
     isLocked = False
 
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
-        self.setWindowFlags(Qt.FramelessWindowHint
-                            | Qt.WindowStaysOnBottomHint
-                            | Qt.X11BypassWindowManagerHint
-                            | Qt.Tool)
+        self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setFixedSize(self.height(), self.width())
+        win32gui.SetParent(self.winId(), utils.getWindowsDeskTopHwnd())
         self.ui = QObject()
 
     def setUi(self, myui):
         self.ui = myui
+
+    def focusInEvent(self, *args, **kwargs):
+        pass
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -201,7 +204,7 @@ class ToDoItem(QListWidgetItem):
     def serialize(self):
         return {'id': self.id, 'todo': self.todo, 'imp': self.imp,
                 'emg': self.emg, 'state': self.state, 'create_date': self.create_date,
-                'sort': self.sort, 'end_date':self.end_date}
+                'sort': self.sort, 'end_date': self.end_date}
 
     def unserialize(self, item_data):
         self.id = item_data['id']
