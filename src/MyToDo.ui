@@ -161,6 +161,33 @@ border:0;</string>
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="HistoryListSelectLayout">
+         <item>
+          <widget class="QDateEdit" name="HistoryItemDateEdit">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="displayFormat">
+            <string>yyyy-MM-dd</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="HistorySelectBtn">
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>选择历史</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="QListWidget" name="DoneListWidget">
          <property name="styleSheet">
           <string notr="true">background-color:transparent;

@@ -50,3 +50,6 @@ class FileUtil(object):
         with open(path, 'r+', encoding='UTF-8') as f:
             filestr = f.read()
         return filestr.strip().replace('\ufeff', '')
+
+
+

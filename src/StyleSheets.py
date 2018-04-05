@@ -1,5 +1,6 @@
 import utils
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QGraphicsDropShadowEffect
+from PyQt5.QtGui import QColor
 
 
 class StyleSheets(object):

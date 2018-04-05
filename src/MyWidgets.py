@@ -6,7 +6,9 @@ import sys
 import os
 import time
 from StyleSheets import *
-from PyQt5.Qt import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from service import *
 
 
@@ -244,9 +246,15 @@ class MyToDoUi(QObject):
         self.timer = QTimer(self)
         self.ui.LockBtn.setText("已解锁")
         self.export_dialog = MyDialog(self.mainWindow)
+        self.calendar_dialog_layout = QHBoxLayout()
+        self.calendar_dialog = QDialog(self.mainWindow)
+        self.calendar = QCalendarWidget()
 
     def init(self):
         self.reload()
+        self.ui.HistoryItemDateEdit.dateChanged.connect(self.historyDateChangedSlot)
+        self.ui.HistoryItemDateEdit.setDate(QDate.currentDate())
+        self.ui.HistorySelectBtn.clicked.connect(self.historySelectBtnClickedSlot)
         self.ui.ToDoListWidget.itemDoubleClicked.connect(self.itemDoubleClickedSlot)
         self.ui.ExitBtn.clicked.connect(self.exit)
         self.ui.LockBtn.clicked.connect(self.lockPoint)
@@ -268,12 +276,9 @@ class MyToDoUi(QObject):
     def reload(self):
         self.ui.ToDoListWidget.clear()
         self.ui.DoneListWidget.clear()
-        where_sql = "and state=0 or date(end_date)='" + utils.getNowQDate("yyyy-MM-dd") + "'"
+        where_sql = "and state=" + str(ToDoItem.TODO_STATE)
         for item in queryItems(where_sql):
-            if item['state'] == ToDoItem.TODO_STATE:
-                todo_item = ToDoItem(self.ui.ToDoListWidget)
-            elif item['state'] == ToDoItem.DONE_STATE:
-                todo_item = ToDoItem(self.ui.DoneListWidget, item["todo"], ToDoItem.DONE_STATE)
+            todo_item = ToDoItem(self.ui.ToDoListWidget)
             self.addToDoItem(todo_item.unserialize(item))
 
     def lockPoint(self):
@@ -323,6 +328,24 @@ class MyToDoUi(QObject):
     @staticmethod
     def itemDoubleClickedSlot(item: ToDoItem):
         item.itemDoubleClicked()
+
+    def historyDateChangedSlot(self):
+        self.ui.DoneListWidget.clear()
+        where_sql = "and state=" + str(ToDoItem.DONE_STATE) \
+                    + " and date(end_date)='" + self.ui.HistoryItemDateEdit.text() + "'"
+        for item in queryItems(where_sql):
+            todo_item = ToDoItem(self.ui.DoneListWidget, item["todo"], ToDoItem.DONE_STATE)
+            self.addToDoItem(todo_item.unserialize(item))
+
+    def historySelectBtnClickedSlot(self):
+        self.calendar.clicked.connect(self.historyItemCalendarClickedSlot)
+        self.calendar_dialog_layout.addWidget(self.calendar)
+        self.calendar_dialog.setLayout(self.calendar_dialog_layout)
+        self.calendar_dialog.show()
+
+    def historyItemCalendarClickedSlot(self):
+        self.ui.HistoryItemDateEdit.setDate(self.calendar.selectedDate())
+        self.calendar_dialog.hide()
 
     def showMainWindow(self):
         self.mainWindow.show()
